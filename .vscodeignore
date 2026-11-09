@@ -1,0 +1,19 @@
+.vscode/**
+.vscode-test/**
+.vscode-test.mjs
+out/**
+node_modules/**
+src/**
+docs/**
+scripts/**
+.gitignore
+.yarnrc
+esbuild.js
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/eslint.config.mjs
+**/*.map
+**/*.ts
+**/.vscode-test.*
+# The 1024x1024 source art; only the 128x128 icon.png is shipped.
+resources/kvstream-logo.png

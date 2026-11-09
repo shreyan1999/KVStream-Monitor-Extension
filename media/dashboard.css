@@ -1,0 +1,1057 @@
+/*
+ * KVStream Monitor — shared stylesheet for the sidebar view and the dashboard
+ * panel.
+ *
+ * Every colour is a VS Code theme variable, or a tint mixed from one, so the
+ * same cards read correctly in dark, light and high-contrast themes rather
+ * than approximating one palette. The six accents come from the theme's chart
+ * colours; status meaning never relies on colour alone — each dot carries a
+ * word beside it.
+ *
+ * Layout keys off `body.mode-sidebar` / `body.mode-dashboard`.
+ */
+
+:root {
+	--kv-gap: 14px;
+	--kv-radius: 8px;
+	--kv-fg: var(--vscode-foreground);
+	--kv-muted: var(--vscode-descriptionForeground);
+	--kv-border: var(--vscode-widget-border, rgba(128, 128, 128, 0.22));
+	--kv-bg: var(--vscode-editor-background);
+	--kv-card: color-mix(in srgb, var(--vscode-foreground) 3.5%, var(--vscode-editor-background));
+	--kv-card-hover: color-mix(in srgb, var(--vscode-foreground) 6%, var(--vscode-editor-background));
+	--kv-track: color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+
+	--kv-blue: var(--vscode-charts-blue, #3794ff);
+	--kv-green: var(--vscode-charts-green, #3fb950);
+	--kv-purple: var(--vscode-charts-purple, #a371f7);
+	--kv-yellow: var(--vscode-charts-yellow, #d29922);
+	--kv-red: var(--vscode-charts-red, #f85149);
+	--kv-orange: var(--vscode-charts-orange, #db6d28);
+	--kv-pink: var(--vscode-terminal-ansiMagenta, #db61a2);
+	--kv-cyan: var(--vscode-terminal-ansiCyan, #39c5cf);
+}
+
+body.vscode-light {
+	--kv-card: color-mix(in srgb, var(--vscode-foreground) 2.5%, var(--vscode-editor-background));
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: var(--vscode-font-family);
+	font-size: var(--vscode-font-size);
+	color: var(--kv-fg);
+	background: transparent;
+}
+
+body.mode-sidebar {
+	background: transparent;
+}
+
+#root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--kv-gap);
+	padding: 18px 22px 28px;
+	max-width: 100%;
+}
+
+body.mode-sidebar #root {
+	gap: 10px;
+	padding: 8px 10px 16px;
+}
+
+/*
+ * Nothing may widen the page. A gateway URL, backend endpoint or model id is a
+ * long unbroken string; at sidebar width one of them is enough to push every
+ * right-aligned value out of sight.
+ */
+#root,
+#root * {
+	min-width: 0;
+}
+
+.boot,
+.empty {
+	color: var(--kv-muted);
+	font-size: 12px;
+	padding: 10px 0;
+}
+
+.mono {
+	font-family: var(--vscode-editor-font-family);
+	font-size: 0.92em;
+}
+
+.na {
+	color: var(--kv-muted);
+	font-style: italic;
+}
+
+.truncate {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.icon {
+	display: inline-flex;
+	width: 16px;
+	height: 16px;
+	flex: 0 0 auto;
+}
+
+.icon svg {
+	width: 100%;
+	height: 100%;
+}
+
+/* -- hero header ------------------------------------------------------- */
+
+.hero {
+	display: flex;
+	align-items: center;
+	gap: 14px 18px;
+	flex-wrap: wrap;
+	padding: 2px 2px 6px;
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.brand-logo {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	display: grid;
+	place-items: center;
+	color: var(--kv-blue);
+	background: color-mix(in srgb, var(--kv-blue) 16%, transparent);
+	flex: 0 0 auto;
+}
+
+.brand-logo .icon {
+	width: 26px;
+	height: 26px;
+}
+
+.brand h1 {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	line-height: 1.15;
+}
+
+.brand p {
+	margin: 2px 0 0;
+	color: var(--kv-muted);
+	font-size: 12.5px;
+}
+
+.hero .spacer {
+	flex: 1 1 auto;
+}
+
+.health-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 17px;
+	font-weight: 600;
+	white-space: nowrap;
+	color: var(--tone, var(--kv-muted));
+}
+
+.health-badge .dot {
+	width: 10px;
+	height: 10px;
+}
+
+.hero-meta {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.updated {
+	display: flex;
+	flex-direction: column;
+	font-size: 11px;
+	color: var(--kv-muted);
+	line-height: 1.35;
+	text-align: right;
+}
+
+.updated strong {
+	color: var(--kv-fg);
+	font-weight: 500;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.updated.stale strong {
+	color: var(--kv-yellow);
+}
+
+/* -- tone helpers (status meaning) ------------------------------------- */
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--tone, var(--kv-muted));
+	flex: 0 0 auto;
+}
+
+.tone-ok {
+	--tone: var(--kv-green);
+}
+.tone-warn {
+	--tone: var(--kv-yellow);
+}
+.tone-bad {
+	--tone: var(--kv-red);
+}
+.tone-info {
+	--tone: var(--kv-blue);
+}
+.tone-idle {
+	--tone: var(--kv-muted);
+}
+
+/* A value that is the problem, e.g. "none loaded" for the model. */
+.warn-text {
+	color: var(--kv-yellow);
+}
+
+.status-word {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	color: var(--tone, var(--kv-muted));
+	font-weight: 550;
+	white-space: nowrap;
+}
+
+/* -- switch ------------------------------------------------------------ */
+
+.switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	font-size: 12px;
+	color: var(--kv-fg);
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	font-family: inherit;
+}
+
+.switch .track {
+	width: 34px;
+	height: 18px;
+	border-radius: 9px;
+	background: var(--kv-track);
+	position: relative;
+	transition: background 0.15s ease;
+}
+
+.switch .track::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: var(--vscode-foreground);
+	transition: transform 0.15s ease;
+}
+
+.switch[aria-checked='true'] .track {
+	background: var(--kv-blue);
+}
+
+.switch[aria-checked='true'] .track::after {
+	transform: translateX(16px);
+	background: #fff;
+}
+
+/* -- buttons ----------------------------------------------------------- */
+
+button {
+	font-family: inherit;
+	font-size: 12.5px;
+	color: var(--kv-fg);
+	cursor: pointer;
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	padding: 7px 14px;
+	min-height: 34px;
+	border-radius: 6px;
+	border: 1px solid var(--kv-border);
+	background: transparent;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+	background: var(--kv-card-hover);
+}
+
+.btn.solid-green {
+	background: var(--kv-green);
+	border-color: transparent;
+	color: #fff;
+}
+
+.btn.solid-blue {
+	background: var(--vscode-button-background, var(--kv-blue));
+	border-color: transparent;
+	color: var(--vscode-button-foreground, #fff);
+}
+
+.btn.solid-green:hover:not(:disabled),
+.btn.solid-blue:hover:not(:disabled) {
+	filter: brightness(1.1);
+}
+
+.btn:disabled {
+	opacity: 0.42;
+	cursor: default;
+}
+
+/* A disabled primary must not still read as the call to action: drop the
+   fill so only the enabled solid button stands out. */
+.btn.solid-green:disabled,
+.btn.solid-blue:disabled {
+	background: transparent;
+	border-color: var(--kv-border);
+	color: var(--kv-fg);
+}
+
+.btn.small {
+	min-height: 28px;
+	padding: 4px 10px;
+	font-size: 12px;
+}
+
+.icon-btn {
+	display: inline-grid;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
+	border: 0;
+	background: transparent;
+	color: var(--kv-muted);
+}
+
+.icon-btn:hover:not(:disabled) {
+	background: var(--kv-card-hover);
+	color: var(--kv-fg);
+}
+
+.icon-btn .icon {
+	width: 17px;
+	height: 17px;
+}
+
+.chip {
+	padding: 3px 11px;
+	border-radius: 5px;
+	border: 1px solid var(--kv-border);
+	background: transparent;
+	font-size: 12px;
+	color: var(--kv-fg);
+}
+
+.chip[aria-pressed='true'] {
+	background: color-mix(in srgb, var(--kv-blue) 22%, transparent);
+	border-color: color-mix(in srgb, var(--kv-blue) 55%, transparent);
+	color: var(--kv-fg);
+}
+
+button:focus-visible,
+input:focus-visible,
+.nav-item:focus-visible,
+[tabindex]:focus-visible {
+	outline: 1px solid var(--vscode-focusBorder);
+	outline-offset: 2px;
+}
+
+/* -- cards ------------------------------------------------------------- */
+
+.card {
+	background: var(--kv-card);
+	border: 1px solid var(--kv-border);
+	border-radius: var(--kv-radius);
+	padding: 18px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+body.mode-sidebar .card {
+	padding: 12px;
+	gap: 10px;
+	border-radius: 6px;
+}
+
+.card-title {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+body.mode-sidebar .card-title {
+	font-size: 12px;
+}
+
+.card-title .icon {
+	color: var(--kv-muted);
+}
+
+.card-title .grow {
+	flex: 1 1 auto;
+}
+
+.card-note {
+	margin: 0;
+	font-size: 11.5px;
+	color: var(--kv-muted);
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+
+.icon-tile {
+	width: 44px;
+	height: 44px;
+	border-radius: 9px;
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	color: var(--accent, var(--kv-blue));
+	background: color-mix(in srgb, var(--accent, var(--kv-blue)) 16%, transparent);
+}
+
+.icon-tile .icon {
+	width: 22px;
+	height: 22px;
+}
+
+.icon-tile.sm {
+	width: 34px;
+	height: 34px;
+	border-radius: 8px;
+}
+
+.icon-tile.sm .icon {
+	width: 18px;
+	height: 18px;
+}
+
+.accent-blue {
+	--accent: var(--kv-blue);
+}
+.accent-green {
+	--accent: var(--kv-green);
+}
+.accent-purple {
+	--accent: var(--kv-purple);
+}
+.accent-yellow {
+	--accent: var(--kv-yellow);
+}
+.accent-cyan {
+	--accent: var(--kv-cyan);
+}
+.accent-pink {
+	--accent: var(--kv-pink);
+}
+
+/* -- grids ------------------------------------------------------------- */
+
+.grid {
+	display: grid;
+	gap: var(--kv-gap);
+}
+
+.row-top {
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.row-stats {
+	grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+}
+
+.row-mid {
+	grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.1fr) minmax(0, 0.95fr);
+}
+
+@media (max-width: 1100px) {
+	.row-mid {
+		grid-template-columns: 1fr 1fr;
+	}
+	.row-mid > .chart-card {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 680px) {
+	.row-mid {
+		grid-template-columns: 1fr;
+	}
+}
+
+body.mode-sidebar .grid {
+	gap: 10px;
+}
+
+body.mode-sidebar .row-stats {
+	grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+/* -- service cards ----------------------------------------------------- */
+
+.service-head {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+}
+
+.service-head h3 {
+	margin: 0 0 4px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+body.mode-sidebar .service-head h3 {
+	font-size: 13px;
+	margin: 0 0 2px;
+}
+
+.kv {
+	display: grid;
+	grid-template-columns: 74px minmax(0, 1fr);
+	gap: 7px 12px;
+	margin: 0;
+	font-size: 12.5px;
+}
+
+.kv dt {
+	color: var(--kv-muted);
+}
+
+.kv dd {
+	margin: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+body.mode-sidebar .kv {
+	grid-template-columns: 64px minmax(0, 1fr);
+	gap: 4px 10px;
+	font-size: 12px;
+}
+
+/* -- quick actions ----------------------------------------------------- */
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+}
+
+.actions .btn {
+	flex: 1 1 108px;
+}
+
+body.mode-sidebar .actions {
+	gap: 6px;
+}
+
+body.mode-sidebar .actions .btn {
+	flex: 1 1 82px;
+	min-height: 28px;
+	padding: 4px 8px;
+	font-size: 12px;
+}
+
+.subhead {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--kv-muted);
+	margin: 2px 0 -4px;
+}
+
+/* -- stat cards -------------------------------------------------------- */
+
+.stat {
+	gap: 10px;
+	padding: 16px 16px 14px;
+}
+
+body.mode-sidebar .stat {
+	padding: 10px 11px;
+	gap: 6px;
+}
+
+.stat-head {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+body.mode-sidebar .stat-head {
+	font-size: 11.5px;
+	gap: 8px;
+}
+
+.stat-value {
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+body.mode-sidebar .stat-value {
+	font-size: 20px;
+}
+
+.stat-value.na {
+	font-size: 18px;
+	font-weight: 400;
+}
+
+body.mode-sidebar .stat-value.na {
+	font-size: 14px;
+}
+
+.stat-sub {
+	font-size: 11.5px;
+	color: var(--kv-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.stat-foot {
+	min-height: 22px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.delta.up {
+	color: var(--kv-green);
+}
+.delta.down {
+	color: var(--kv-red);
+}
+.delta.flat {
+	color: var(--kv-muted);
+}
+
+/* A rising queue is bad news; colour it as such. */
+.delta.up.inverse {
+	color: var(--kv-yellow);
+}
+.delta.down.inverse {
+	color: var(--kv-green);
+}
+
+.bar {
+	height: 6px;
+	width: 100%;
+	border-radius: 3px;
+	background: var(--kv-track);
+	overflow: hidden;
+}
+
+.bar > span {
+	display: block;
+	height: 100%;
+	border-radius: 3px;
+	background: var(--accent, var(--kv-blue));
+	width: 0;
+	transition: width 0.35s ease;
+}
+
+.spark {
+	width: 100%;
+	height: 22px;
+	display: block;
+}
+
+/* -- charts ------------------------------------------------------------ */
+
+.chart-card .chart-host {
+	position: relative;
+	width: 100%;
+	height: 200px;
+}
+
+.chart-host svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.axis-label {
+	fill: var(--kv-muted);
+	font-size: 11px;
+	font-family: var(--vscode-font-family);
+}
+
+.grid-line {
+	stroke: var(--kv-border);
+	stroke-width: 1;
+}
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	font-size: 12px;
+	color: var(--kv-fg);
+}
+
+.legend span {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.swatch {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: var(--accent);
+}
+
+.chart-empty {
+	display: grid;
+	place-items: center;
+	height: 100%;
+	text-align: center;
+	color: var(--kv-muted);
+	font-size: 12px;
+	border: 1px dashed var(--kv-border);
+	border-radius: 6px;
+	padding: 12px;
+}
+
+.segmented {
+	display: inline-flex;
+	gap: 4px;
+}
+
+/* -- donut ------------------------------------------------------------- */
+
+.donut-wrap {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	flex-wrap: wrap;
+}
+
+.donut {
+	position: relative;
+	width: 136px;
+	height: 136px;
+	flex: 0 0 auto;
+}
+
+.donut svg {
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+
+.donut-center {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	text-align: center;
+}
+
+.donut-center strong {
+	font-size: 24px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.donut-center span {
+	font-size: 11.5px;
+	color: var(--kv-muted);
+}
+
+.donut-legend {
+	flex: 1 1 140px;
+	display: grid;
+	gap: 9px;
+	font-size: 12.5px;
+}
+
+.donut-legend .row {
+	display: grid;
+	grid-template-columns: 9px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+}
+
+.donut-legend .pct {
+	font-variant-numeric: tabular-nums;
+	color: var(--kv-fg);
+}
+
+/* -- health list ------------------------------------------------------- */
+
+.health-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: -6px -8px;
+}
+
+.health-row {
+	display: grid;
+	grid-template-columns: 20px minmax(0, 1fr) auto;
+	gap: 10px;
+	align-items: center;
+	padding: 8px;
+	border-radius: 6px;
+	text-align: left;
+	background: transparent;
+	border: 0;
+	width: 100%;
+}
+
+button.health-row:hover {
+	background: var(--kv-card-hover);
+}
+
+.health-row .icon {
+	color: var(--kv-muted);
+}
+
+.health-row .name {
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.health-row .sub {
+	font-size: 11.5px;
+	color: var(--kv-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.health-row .status-word {
+	font-size: 12px;
+}
+
+/* -- sidebar nav ------------------------------------------------------- */
+
+.nav {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.nav-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 10px;
+	border-radius: 5px;
+	border: 0;
+	background: transparent;
+	color: var(--kv-fg);
+	font-size: 13px;
+	text-align: left;
+	width: 100%;
+}
+
+.nav-item:hover {
+	background: var(--vscode-list-hoverBackground, var(--kv-card-hover));
+}
+
+.nav-item .icon {
+	color: var(--kv-muted);
+}
+
+.side-header {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.side-header .brand-logo {
+	width: 30px;
+	height: 30px;
+	border-radius: 7px;
+}
+
+.side-header .brand-logo .icon {
+	width: 18px;
+	height: 18px;
+}
+
+.side-header .title {
+	font-weight: 600;
+	font-size: 13px;
+}
+
+.side-header .spacer {
+	flex: 1 1 auto;
+}
+
+.side-header .health-badge {
+	font-size: 12px;
+	gap: 6px;
+}
+
+.side-header .health-badge .dot {
+	width: 8px;
+	height: 8px;
+}
+
+/* -- banners ----------------------------------------------------------- */
+
+.banner {
+	border-left: 3px solid var(--kv-yellow);
+	background: color-mix(in srgb, var(--kv-yellow) 10%, transparent);
+	padding: 9px 12px;
+	border-radius: 4px;
+	font-size: 12.5px;
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+
+.banner.error {
+	border-left-color: var(--kv-red);
+	background: color-mix(in srgb, var(--kv-red) 10%, transparent);
+}
+
+.banner .hint {
+	display: block;
+	margin-top: 3px;
+	color: var(--kv-muted);
+}
+
+/* -- logs -------------------------------------------------------------- */
+
+.log-tools {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.log-tools input[type='search'] {
+	width: 170px;
+	padding: 4px 8px;
+	font-family: inherit;
+	font-size: 12px;
+	color: var(--vscode-input-foreground);
+	background: var(--vscode-input-background);
+	border: 1px solid var(--vscode-input-border, var(--kv-border));
+	border-radius: 5px;
+}
+
+.log-list {
+	font-family: var(--vscode-editor-font-family);
+	font-size: 12.5px;
+	line-height: 1.75;
+	max-height: 260px;
+	overflow-y: auto;
+	margin: -4px -4px 0;
+	padding: 0 4px;
+}
+
+body.mode-sidebar .log-list {
+	max-height: 150px;
+	font-size: 11.5px;
+	line-height: 1.6;
+}
+
+.log-line {
+	display: grid;
+	grid-template-columns: 70px 54px minmax(0, 1fr);
+	gap: 10px;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+body.mode-sidebar .log-line {
+	grid-template-columns: 58px 40px minmax(0, 1fr);
+	gap: 6px;
+}
+
+.log-line .ts {
+	color: var(--kv-muted);
+}
+
+.log-line .lvl {
+	font-weight: 600;
+	text-transform: uppercase;
+	color: var(--kv-blue);
+}
+
+.log-line.level-warn .lvl {
+	color: var(--kv-yellow);
+}
+.log-line.level-error .lvl {
+	color: var(--kv-red);
+}
+.log-line.level-debug .lvl {
+	color: var(--kv-muted);
+}
+
+.log-foot {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation: none !important;
+		transition: none !important;
+	}
+}

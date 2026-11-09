@@ -1,0 +1,235 @@
+{
+  "name": "kvstream-monitor",
+  "displayName": "KVStream Monitor",
+  "description": "Monitor and manage KVStream and Foundry Local directly from Visual Studio Code.",
+  "version": "0.0.1",
+  "icon": "resources/icon.png",
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "kvstream",
+    "foundry local",
+    "monitoring",
+    "openai",
+    "llm"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "kvstream-monitor.openMonitor",
+        "title": "Open Monitor",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.openDashboard",
+        "title": "Open Dashboard",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.refresh",
+        "title": "Refresh",
+        "category": "KVStream",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "kvstream-monitor.checkHealth",
+        "title": "Check Health",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.configureEndpoint",
+        "title": "Configure Endpoint",
+        "category": "KVStream",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "kvstream-monitor.start",
+        "title": "Start Service",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.stop",
+        "title": "Stop Service",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.restart",
+        "title": "Restart Service",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.startFoundry",
+        "title": "Start Foundry Local",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.stopFoundry",
+        "title": "Stop Foundry Local",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.restartFoundry",
+        "title": "Restart Foundry Local",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.loadFoundryModel",
+        "title": "Load Foundry Local Model",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.calibrate",
+        "title": "Calibrate Admission Budget",
+        "category": "KVStream"
+      },
+      {
+        "command": "kvstream-monitor.showLogs",
+        "title": "Open Output Channel",
+        "category": "KVStream"
+      }
+    ],
+    "configuration": {
+      "title": "KVStream Monitor",
+      "properties": {
+        "kvstream.url": {
+          "type": "string",
+          "default": "http://127.0.0.1:8080",
+          "format": "uri",
+          "markdownDescription": "Base URL of the **KVStream gateway** — not the Foundry Local backend, which KVStream discovers itself. Only `http` and `https` are accepted."
+        },
+        "kvstream.refreshInterval": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 500,
+          "maximum": 300000,
+          "markdownDescription": "How often to poll `/health` and `/status`, in milliseconds."
+        },
+        "kvstream.metricsRefreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "maximum": 600000,
+          "markdownDescription": "How often to poll `/metrics`, in milliseconds. The Prometheus payload is larger than the JSON endpoints, so it is polled less often."
+        },
+        "kvstream.requestTimeout": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 250,
+          "maximum": 60000,
+          "description": "Per-request timeout for gateway calls, in milliseconds."
+        },
+        "kvstream.historyWindow": {
+          "type": "number",
+          "default": 3600000,
+          "minimum": 60000,
+          "maximum": 3600000,
+          "description": "How much trend history to keep in memory, in milliseconds. History is never written to disk."
+        },
+        "kvstream.logBufferSize": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 100,
+          "maximum": 20000,
+          "description": "Maximum number of log lines held in memory for a gateway started by this extension."
+        },
+        "kvstream.kvstreamPath": {
+          "type": "string",
+          "default": "kvstream",
+          "markdownDescription": "Executable used for `kvstream serve` and `kvstream calibrate`. Run with no shell, so this must be a path to an executable, not a command line."
+        },
+        "kvstream.kvstreamArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Extra arguments appended to `kvstream serve`, one array entry per argument (for example `[\"--mode\", \"tokens\"]`)."
+        },
+        "kvstream.foundryPath": {
+          "type": "string",
+          "default": "foundry",
+          "markdownDescription": "Executable used for Foundry Local CLI lookups and `foundry server` commands."
+        },
+        "kvstream.enableFoundryCli": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Allow this extension to run the Foundry Local CLI for backend discovery and host information. With this off, backend details come only from what KVStream reports."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "kvstream",
+          "title": "KVStream",
+          "icon": "resources/kvstream.svg"
+        }
+      ]
+    },
+    "views": {
+      "kvstream": [
+        {
+          "type": "webview",
+          "id": "kvstream.monitor",
+          "name": "Monitor",
+          "icon": "resources/kvstream.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "kvstream-monitor.refresh",
+          "when": "view == kvstream.monitor",
+          "group": "navigation@1"
+        },
+        {
+          "command": "kvstream-monitor.configureEndpoint",
+          "when": "view == kvstream.monitor",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "load-test": "node scripts/kvstream-load.mjs",
+    "vsix": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.140.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "typescript-eslint": "^8.61.1",
+    "eslint": "^10.5.0",
+    "esbuild": "^0.28.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^6.0.3",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  }
+}

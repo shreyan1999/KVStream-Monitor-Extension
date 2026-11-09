@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+  <!--
+    Activity Bar icon. VS Code renders these monochrome from a single fill, so
+    this is drawn as flat shapes with no gradients or strokes: a gateway bar
+    with three request lanes queueing behind it, which is what KVStream does.
+  -->
+  <path d="M3.25 4.5h1.6v15h-1.6z"/>
+  <path d="M7.1 6.2h6.2v2.1H7.1zM7.1 10.95h9.1v2.1H7.1zM7.1 15.7h4.3v2.1H7.1z"/>
+  <path d="M18.35 4.5h1.6v15h-1.6z" opacity=".55"/>
+  <circle cx="16.1" cy="7.25" r="1.35" opacity=".8"/>
+</svg>
