@@ -6,6 +6,38 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.1.0] — 2026-11-09
+
+First Marketplace release, marked **preview**: verified end to end on Windows only.
+
+### Security
+
+- `kvstream.kvstreamPath`, `kvstream.kvstreamArgs` and `kvstream.foundryPath` are now
+  **machine-scoped**: they can be set only in user settings, so a workspace's
+  `.vscode/settings.json` can no longer choose which program the extension runs. A value set in a
+  workspace is ignored; move it to user settings.
+- **Workspace Trust** is declared (`limited`). In Restricted Mode, monitoring and the Foundry Local
+  controls work; **Start KVStream** and **Calibrate** are disabled with the reason shown, because
+  KVStream reads `kvstream.yaml` from the workspace folder it runs in.
+
+### Packaging
+
+- Publisher `shreyan1999`, **MIT** license (`LICENSE`), repository, issues and homepage links, and
+  README screenshots rendered from a live run. The README and description state that this is an
+  unofficial project, not affiliated with Microsoft.
+- `@vscode/vsce` is a dev dependency, so `npm run vsix` packages without a global install.
+
+### Fixed in 0.1.0
+
+- Right after KVStream started, the dashboard could show **"Cannot reach …/health (ECONNREFUSED)"**
+  over a gateway that was already answering, and turn the header Degraded. The refused connection
+  was from before the gateway listened; it is now dropped as soon as `/status` answers. This also
+  let the "no model is loaded" banner show when it applies.
+- The live end-to-end test gains a sustained-load step: 12 clients against a budget of 8 for ~45 s,
+  checking that Running reaches the budget, the Queue fills and every request is counted.
+
 ### Changed
 
 - **Sidebar is now just a menu**: the gateway's status word plus Dashboard / Logs / Settings. Service
@@ -56,7 +88,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [0.0.1] — 2026-10-28
 
-First working version.
+First working version. Not published.
 
 ### Added
 

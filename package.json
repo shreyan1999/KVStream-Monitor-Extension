@@ -1,9 +1,20 @@
 {
   "name": "kvstream-monitor",
   "displayName": "KVStream Monitor",
-  "description": "Monitor and manage KVStream and Foundry Local directly from Visual Studio Code.",
-  "version": "0.0.1",
+  "description": "Unofficial monitor for KVStream and Microsoft Foundry Local: live health, requests, queue and admission budget, with start, stop and model loading from VS Code.",
+  "version": "0.1.0",
+  "publisher": "shreyan1999",
+  "license": "MIT",
+  "preview": true,
   "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shreyan1999/KVStream-Monitor-Extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shreyan1999/KVStream-Monitor-Extension/issues"
+  },
+  "homepage": "https://github.com/shreyan1999/KVStream-Monitor-Extension#readme",
   "engines": {
     "vscode": "^1.140.0"
   },
@@ -21,6 +32,17 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Monitoring and Foundry Local controls work in Restricted Mode. Starting KVStream or running Calibrate needs a trusted workspace, because KVStream reads kvstream.yaml from the workspace folder; the executable settings are taken from user settings only.",
+      "restrictedConfigurations": [
+        "kvstream.kvstreamPath",
+        "kvstream.kvstreamArgs",
+        "kvstream.foundryPath"
+      ]
+    }
+  },
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -143,21 +165,24 @@
         },
         "kvstream.kvstreamPath": {
           "type": "string",
+          "scope": "machine",
           "default": "kvstream",
-          "markdownDescription": "Executable used for `kvstream serve` and `kvstream calibrate`. Run with no shell, so this must be a path to an executable, not a command line."
+          "markdownDescription": "Executable used for `kvstream serve` and `kvstream calibrate`. Run with no shell, so this must be a path to an executable, not a command line. Set in user settings only: a workspace cannot change which program this extension runs."
         },
         "kvstream.kvstreamArgs": {
           "type": "array",
+          "scope": "machine",
           "items": {
             "type": "string"
           },
           "default": [],
-          "markdownDescription": "Extra arguments appended to `kvstream serve`, one array entry per argument (for example `[\"--mode\", \"tokens\"]`)."
+          "markdownDescription": "Extra arguments appended to `kvstream serve`, one array entry per argument (for example `[\"--mode\", \"tokens\"]`). Set in user settings only: a workspace cannot change which program this extension runs."
         },
         "kvstream.foundryPath": {
           "type": "string",
+          "scope": "machine",
           "default": "foundry",
-          "markdownDescription": "Executable used for Foundry Local CLI lookups and `foundry server` commands."
+          "markdownDescription": "Executable used for Foundry Local CLI lookups and `foundry server` commands. Set in user settings only: a workspace cannot change which program this extension runs."
         },
         "kvstream.enableFoundryCli": {
           "type": "boolean",
@@ -217,16 +242,17 @@
     "vsix": "vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/vscode": "^1.140.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "typescript-eslint": "^8.61.1",
-    "eslint": "^10.5.0",
+    "@types/vscode": "^1.140.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^4.1.0",
     "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^6.0.3",
-    "@vscode/test-cli": "^0.0.15",
-    "@vscode/test-electron": "^3.0.0"
+    "typescript-eslint": "^8.61.1"
   },
   "overrides": {
     "diff": "^8.0.4",

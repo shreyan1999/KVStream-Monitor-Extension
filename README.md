@@ -9,6 +9,11 @@ throughput and queue-depth trends, and the live output of a gateway it started i
 displays comes from an endpoint KVStream actually serves; anything the gateway does not report is
 shown as `n/a` with the reason, never as `0`.
 
+> **Unofficial.** KVStream Monitor is an independent project. It is not affiliated with, endorsed by
+> or supported by Microsoft, which publishes Foundry Local and KVStream.
+
+![The dashboard while KVStream serves Phi-3-mini through Foundry Local](images/dashboard.png)
+
 ---
 
 ## What you get
@@ -23,9 +28,12 @@ shown as `n/a` with the reason, never as `0`.
 
 Both views render the same sample from one shared poller, so they never disagree.
 
-> **Screenshots.** Captured during verification but not embedded: the Marketplace rewrites relative
-> image links against a `repository` URL, and none is set yet. See
-> [What has and has not been verified](#what-has-and-has-not-been-verified).
+| Foundry Local up with no model loaded | The sidebar menu |
+|---|---|
+| ![Degraded, with No model loaded and the Load model button highlighted](images/no-model.png) | ![The sidebar: status and Dashboard, Logs, Settings](images/sidebar.png) |
+
+The screenshots are rendered from states the extension recorded during a live run against Foundry
+Local 0.10.3 and KVStream 1.0.0.
 
 ---
 
@@ -39,11 +47,13 @@ nothing else.
 
 ### 1. Install the extension
 
+From the Marketplace: search for **KVStream Monitor** in the Extensions view, or run
+
 ```bash
-code --install-extension kvstream-monitor-0.0.1.vsix
+code --install-extension shreyan1999.kvstream-monitor
 ```
 
-Or in VS Code: **Extensions: Install from VSIX…** and pick the file. A **KVStream** icon appears in
+From a package file: **Extensions: Install from VSIX…** and pick `kvstream-monitor-0.1.0.vsix`. A **KVStream** icon appears in
 the Activity Bar and `KVStream: disconnected` in the Status Bar until a gateway is running.
 
 ### 2. Install KVStream (once)
@@ -151,7 +161,7 @@ single flat load.
 npm install
 npm run compile      # type-check, lint, bundle with esbuild
 npm test             # 135 tests in a real VS Code host (the live suite below is skipped)
-npm run vsix         # produce kvstream-monitor-0.0.1.vsix
+npm run vsix         # produce kvstream-monitor-0.1.0.vsix
 ```
 
 **Live end-to-end test.** With Foundry Local *stopped*, a model in its cache and port 8080 free:
@@ -403,10 +413,13 @@ No port is ever assumed. Specific cases:
 | `kvstream.requestTimeout` | `3000` | Per-request timeout, ms. |
 | `kvstream.historyWindow` | `3600000` | Trend window, ms. In memory only. |
 | `kvstream.logBufferSize` | `2000` | Max buffered log lines. |
-| `kvstream.kvstreamPath` | `kvstream` | Executable path. Run with no shell. |
-| `kvstream.kvstreamArgs` | `[]` | Extra `serve` arguments, one per array entry. |
-| `kvstream.foundryPath` | `foundry` | Executable path. |
+| `kvstream.kvstreamPath` | `kvstream` | Executable path. Run with no shell. User settings only. |
+| `kvstream.kvstreamArgs` | `[]` | Extra `serve` arguments, one per array entry. User settings only. |
+| `kvstream.foundryPath` | `foundry` | Executable path. User settings only. |
 | `kvstream.enableFoundryCli` | `true` | Off disables all CLI process spawning. |
+
+The three marked *user settings only* are machine-scoped, so a workspace's `.vscode/settings.json`
+cannot choose which program the extension runs; a value set there is ignored.
 
 Invalid values are replaced by the default or clamped, logged to the output channel, and summarised
 in one notification. Executable paths containing shell metacharacters (`& | ; < > ` $ " '`) are
@@ -438,6 +451,11 @@ time.
   written with `textContent`.
 - No process is ever launched through a shell. `spawn` is called with an argv array and
   `shell: false`.
+- Which programs run is decided only by user settings: the executable and argument settings are
+  machine-scoped, so a workspace cannot change them.
+- **Workspace Trust:** in Restricted Mode, monitoring and the Foundry Local controls work, but
+  **Start KVStream** and **Calibrate** are disabled. Both run in the workspace folder, and KVStream
+  reads `kvstream.yaml` from there, which can point it at a different backend.
 - No credentials are read, stored or displayed. KVStream has no authentication of its own, and
   `/status` and `/metrics` disclose operational data — treat the endpoint as internal, as the
   KVStream README advises.
@@ -566,9 +584,5 @@ started gateway (no such command), live GPU utilisation (not exposed), multi-gat
 
 ## License
 
-**Not yet chosen.** No `LICENSE` file is included and `package.json` declares no license, because
-the copyright holder for this extension has not been established. KVStream itself is MIT; that says
-nothing about this extension. Add a `LICENSE` file and a `license` field before distributing it.
-
-Marketplace publishing is a separate, explicit action and is not configured here: it needs a
-publisher account and a Personal Access Token, neither of which belongs in this repository.
+[MIT](LICENSE) © 2026 Shreyan Fernandes. KVStream and Foundry Local are separate projects with their
+own licenses.

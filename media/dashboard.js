@@ -1146,7 +1146,7 @@
 		apply(a.startService, caps.canStartKvstream, caps.reasons.canStartKvstream || '', 'Start `kvstream serve` as a child process of VS Code');
 		apply(a.restartService, caps.canRestartKvstream, caps.reasons.canRestartKvstream || '', 'Restart the gateway started here');
 		apply(a.stopService, caps.canStopKvstream, caps.reasons.canStopKvstream || '', 'Stop the gateway started here');
-		apply(a.calibrate, caps.calibrate, '', 'Run `kvstream calibrate` in a terminal');
+		apply(a.calibrate, caps.calibrate, caps.reasons.calibrate || '', 'Run `kvstream calibrate` in a terminal');
 		apply(a.checkHealth, true, '', 'Force a fresh readiness probe (/health?probe=true)');
 		a.openLogs.disabled = false;
 		for (const key of ['startFoundry', 'restartFoundry', 'stopFoundry']) {

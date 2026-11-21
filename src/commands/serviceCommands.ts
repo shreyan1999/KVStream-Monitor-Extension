@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { MonitorService } from '../monitoring/monitorService';
+import { UNTRUSTED_REASON, type MonitorService } from '../monitoring/monitorService';
 import type { ProcessManager } from '../processes/processManager';
 import type { LogService } from '../services/logService';
 import type { Logger } from '../logging';
@@ -100,6 +100,10 @@ export class ServiceCommands implements MonitorActions {
 
 	async startService(): Promise<void> {
 		await this.guard('startService', async () => {
+			if (!vscode.workspace.isTrusted) {
+				void vscode.window.showWarningMessage(UNTRUSTED_REASON);
+				return;
+			}
 			const settings = this.deps.settings();
 			if (this.deps.processes.state.state === 'running') {
 				void vscode.window.showInformationMessage(
@@ -396,6 +400,10 @@ export class ServiceCommands implements MonitorActions {
 	 */
 	async calibrate(): Promise<void> {
 		await this.guard('calibrate', async () => {
+			if (!vscode.workspace.isTrusted) {
+				void vscode.window.showWarningMessage(UNTRUSTED_REASON);
+				return;
+			}
 			const settings = this.deps.settings();
 			const confirm = await vscode.window.showWarningMessage(
 				'Run `kvstream calibrate`?',

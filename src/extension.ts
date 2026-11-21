@@ -69,6 +69,9 @@ export function activate(context: vscode.ExtensionContext): TestApi | undefined 
 		}),
 	);
 
+	// Trusting the workspace enables Start and Calibrate; show that at once.
+	context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(() => monitor.refresh()));
+
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (!event.affectsConfiguration('kvstream')) {

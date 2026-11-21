@@ -40,6 +40,11 @@ import { PollingScheduler } from './pollingScheduler';
  * runs near the gateway cadence, while the full snapshot — version and
  * hardware inventory — is taken slowly.
  */
+/** Why KVStream cannot be started from an untrusted (Restricted Mode) workspace. */
+export const UNTRUSTED_REASON =
+	'This workspace is not trusted. KVStream reads kvstream.yaml from the workspace folder, ' +
+	'so starting it or running Calibrate here needs Workspace Trust.';
+
 export class MonitorService implements vscode.Disposable {
 	private readonly client: KVStreamClient;
 	private readonly detector: FoundryDetector;
@@ -325,6 +330,13 @@ export class MonitorService implements vscode.Disposable {
 			this.status = status;
 			this.statusError = undefined;
 			this.lastSuccessAt = Date.now();
+			if (cameUp && this.healthError?.kind === 'offline') {
+				// The gateway is listening now, so a refused /health connection is
+				// from before it started. Left in place it showed as "Cannot reach
+				// …/health" over a running gateway (seen live) and turned the
+				// header Degraded until the next /health answered.
+				this.healthError = undefined;
+			}
 			this.publish();
 			if (cameUp) {
 				// The gateway just started answering. /health and /metrics may be
@@ -746,14 +758,21 @@ export class MonitorService implements vscode.Disposable {
 		// would only fail on the port bind, so Start is refused up front.
 		const processBusy = this.processes.state.state === 'running' || this.processes.state.state === 'starting';
 		const externalGatewayUp = this.health !== undefined && !owned;
-		if (processBusy) {
+		// `kvstream serve` and `kvstream calibrate` run in the workspace folder,
+		// and KVStream reads kvstream.yaml from there — which can, for one,
+		// point the backend at another address. Not from an untrusted folder.
+		const trusted = vscode.workspace.isTrusted;
+		if (!trusted) {
+			reasons['canStartKvstream'] = UNTRUSTED_REASON;
+			reasons['calibrate'] = UNTRUSTED_REASON;
+		} else if (processBusy) {
 			reasons['canStartKvstream'] = 'a gateway started here is already running';
 		} else if (externalGatewayUp) {
 			reasons['canStartKvstream'] = `a gateway is already answering at ${this.settings.url}`;
 		}
 
 		return {
-			canStartKvstream: !processBusy && !externalGatewayUp,
+			canStartKvstream: trusted && !processBusy && !externalGatewayUp,
 			canStopKvstream: owned,
 			canRestartKvstream: owned,
 			canControlFoundry: this.foundry?.cliAvailable === true,
@@ -762,7 +781,7 @@ export class MonitorService implements vscode.Disposable {
 			// `kvstream calibrate` exists in the CLI, but it drives real load
 			// through the backend for up to a minute. Offered only as a command
 			// that runs in a terminal the user can watch and interrupt.
-			calibrate: true,
+			calibrate: trusted,
 			reasons,
 		};
 	}

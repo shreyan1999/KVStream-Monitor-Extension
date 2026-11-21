@@ -311,6 +311,8 @@ function summary(s: ViewModel): string {
 		const firstAnswer = timeline.find((e) => e.t + startedAt >= clickedAt && e.service !== 'disconnected' && e.service !== 'starting' && e.process === 'running');
 		results['gatewayFirstShownAfterClickMs'] = firstAnswer ? firstAnswer.t + startedAt - clickedAt : null;
 		assert.match(state.backendHint ?? '', /no model is loaded/i, "KVStream's own explanation should reach the dashboard");
+		// The gateway answers, so no connection error may be shown over it.
+		assert.deepStrictEqual(state.errors, [], `no error banner while KVStream answers: ${JSON.stringify(state.errors)}`);
 		assert.deepStrictEqual(state.connection.loadedModels, []);
 		assert.strictEqual(state.capabilities.canLoadModel, true, 'Load model should be offered');
 		assert.ok(state.connection.backendUrl, 'the daemon is up, so its address is shown');
@@ -367,6 +369,59 @@ function summary(s: ViewModel): string {
 		frames['5-after-request'] = state;
 		// One /metrics interval (5 s by default) plus margin: no leftover backoff.
 		assert.ok(ms <= 12_000, `the Requests card took ${ms} ms to count the request`);
+	});
+
+	test('5b. sustained load past the budget: Running reaches it and the Queue fills', async () => {
+		// Twelve clients against a budget of eight for ~45 s: the shape a real
+		// burst of users gives. Also records the states the README shows.
+		const before = api.monitor.state;
+		const budget = before.budget.total.value ?? 8;
+		const baseline = before.requests.totalRequests.value ?? 0;
+		let peakRunning = 0;
+		let peakQueued = 0;
+		const watch = api.monitor.onDidChange((s) => {
+			peakRunning = Math.max(peakRunning, s.requests.running.value ?? 0);
+			peakQueued = Math.max(peakQueued, s.requests.queued.value ?? 0);
+			if (!frames['5b-under-load'] && (s.requests.queued.value ?? 0) > 0 && (s.requests.running.value ?? 0) >= budget) {
+				frames['5b-under-load'] = s;
+			}
+		});
+		const until = Date.now() + 45_000;
+		let sent = 0;
+		let ok = 0;
+		const worker = async (w: number): Promise<void> => {
+			while (Date.now() < until) {
+				sent++;
+				const response = await fetch(`${before.connection.gatewayUrl}/v1/chat/completions`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						model: before.connection.model,
+						// Unique prompts: KVStream merges identical concurrent requests.
+						messages: [{ role: 'user', content: `In one sentence, describe a busy gateway (worker ${w}, request ${sent}).` }],
+						max_tokens: 48,
+					}),
+				}).catch(() => undefined);
+				if (response?.ok) {
+					ok++;
+				}
+				await response?.text().catch(() => undefined);
+			}
+		};
+		await Promise.all(Array.from({ length: 12 }, (_, w) => worker(w)));
+		// Let the queue drain and the next /metrics poll land.
+		const { state } = await waitFor(
+			(s) => (s.requests.totalRequests.value ?? 0) >= baseline + sent && (s.requests.running.value ?? 0) === 0,
+			60_000,
+			'the Requests card to count the whole load and Running to fall back to 0',
+		);
+		watch.dispose();
+		frames['5c-after-load'] = state;
+		results['sustainedLoad'] = { sent, ok, peakRunning, peakQueued, budget, counted: (state.requests.totalRequests.value ?? 0) - baseline };
+		assert.strictEqual(ok, sent, 'every request under load should succeed');
+		assert.strictEqual(peakRunning, budget, 'Running should reach the admission budget and not exceed it');
+		assert.ok(peakQueued > 0, 'the Queue card should show waiting requests');
+		assert.strictEqual((state.requests.totalRequests.value ?? 0) - baseline, sent, 'the Requests card should count every request');
 	});
 
 	test('6. Quick Actions → Health check', async () => {
